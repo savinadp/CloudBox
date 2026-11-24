@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudBox</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>CloudBox</h1>
+        <p class="subtitle">Your secure cloud file storage</p>
+
+        {% with messages = get_flashed_messages() %}
+        
+            {% if messages %}
+        
+            <div class="messages">
+        
+                {% for message in messages %}
+        
+                <p>{{ message }}</p>
+        
+                {% endfor %}
+        
+            </div>
+        
+            {% endif %}
+        
+        {% endwith %}
+
+        <div class="upload-box">
+
+            <h2>Upload a File</h2>
+
+            <form method="POST" enctype="multipart/form-data">
+                <input type="file" name="file">
+
+                <button type="submit">
+                    Upload
+                </button>
+            </form>
+
+        </div>
+
+        <div class="file-list">
+        
+            <h2>My Files</h2>
+        
+            {% if files %}
+        
+                {% for file in files %}
+            
+                    <div class="file-item">
+                    
+                        <span class="file-name">
+                            {{ file }}
+                        </span>
+                    
+                        <div class="file-actions">
+                    
+                            <a href="{{ url_for('download_file', filename=file) }}" class="download-btn">
+                                Download
+                            </a>
+                    
+                            <form action="{{ url_for('delete_file', filename=file) }}" method="POST" class="delete-form">
+                    
+                                <button type="submit" class="delete-btn">
+                                    Delete
+                                </button>
+                    
+                            </form>
+                    
+                        </div>
+                    
+                    </div>
+            
+                {% endfor %}
+        
+            {% else %}
+        
+            <p>No files uploaded yet.</p>
+        
+            {% endif %}
+        
+        </div>
+
+    </div>
+
+</body>
+
+</html>

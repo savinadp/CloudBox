@@ -1,0 +1,74 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin-top: 100px;
+}
+
+h1 {
+    font-size: 48px;
+}
+
+.file-list {
+    margin-top: 40px;
+    text-align: left;
+}
+
+.file-item {
+    background: white;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.file-name {
+    font-weight: 500;
+}
+
+.file-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.download-btn {
+    padding: 8px 14px;
+    background-color: #2563eb;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.download-btn:hover {
+    background-color: #1d4ed8;
+}
+
+.delete-form {
+    margin: 0;
+}
+
+.delete-btn {
+    padding: 8px 14px;
+    border-radius: 5px;
+    text-decoration: none;
+    background-color: #dc2626;
+}
+
+.delete-btn:hover {
+    background-color: #b91c1c;
+}
+
+.messages {
+    margin-bottom: 20px;
+}
+
+.messages p {
+    background-color: #eef2ff;
+    padding: 12px;
+    border-radius: 6px;
+}
