@@ -72,6 +72,12 @@ class File(db.Model):
         nullable=False
     )
 
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id"),
+        nullable=True
+    )
+
 class User(db.Model):
 
     __tablename__ = "users"
@@ -166,7 +172,8 @@ def home():
                 filename=filename,
                 stored_name=stored_name,
                 file_size=file_path.stat().st_size,
-                file_type=file_type
+                file_type=file_type,
+                user_id=session["user_id"]
             )
 
             db.session.add(new_file)
@@ -182,7 +189,9 @@ def home():
 
         return redirect(url_for("home"))
 
-    files = File.query.order_by(
+    files = File.query.filter_by(
+    user_id=session["user_id"]
+    ).order_by(
         File.uploaded_at.desc()
     ).all()
 
@@ -193,7 +202,10 @@ def home():
 @login_required
 def download_file(file_id):
 
-    file = db.get_or_404(File, file_id)
+    file = File.query.filter_by(
+        id=file_id,
+        user_id=session["user_id"]
+    ).first_or_404()
 
     return send_from_directory(
         app.config["UPLOAD_FOLDER"],
@@ -207,8 +219,11 @@ def download_file(file_id):
 @login_required
 def delete_file(file_id):
 
-    file = db.get_or_404(File, file_id)
-
+    file = File.query.filter_by(
+        id=file_id,
+        user_id=session["user_id"]
+    ).first_or_404()
+    
     file_path = UPLOAD_FOLDER / file.stored_name
 
     try:
