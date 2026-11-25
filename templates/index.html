@@ -119,6 +119,40 @@
         
         </div>
 
+        <div class="activity-section">
+        
+            <h2>Recent Activity</h2>
+        
+            {% if activities %}
+        
+            {% for activity in activities %}
+        
+            <div class="activity-item">
+        
+                <div>
+                    <span class="activity-action {{ activity.action.lower() }}">
+                        {{ activity.action }}
+                    </span>
+        
+                    <strong>{{ activity.filename }}</strong>
+                </div>
+        
+                <small>
+                    {{ activity.created_at.strftime('%Y-%m-%d %H:%M') }}
+                </small>
+        
+            </div>
+        
+            {% endfor %}
+        
+            {% else %}
+        
+            <p>No recent activity.</p>
+        
+            {% endif %}
+        
+        </div>
+
     </div>
 
 </body>

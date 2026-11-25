@@ -100,6 +100,36 @@ class User(db.Model):
         nullable=False
     )
 
+class ActivityLog(db.Model):
+
+    __tablename__ = "activity_logs"
+
+    id = db.Column(
+        db.Integer, primary_key=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id"),
+        nullable=False
+    )
+
+    action = db.Column(
+        db.String(50),
+        nullable=False
+    )
+
+    filename = db.Column(
+        db.String(255),
+        nullable=False
+    )
+
+    created_at = db.Column(
+        db.DateTime(timezone=True),
+        server_default=db.func.now(),
+        nullable=False
+    )
+
 UPLOAD_FOLDER = Path(app.root_path) / "uploads"
 UPLOAD_FOLDER.mkdir(exist_ok=True)
 
@@ -136,6 +166,17 @@ def login_required(func):
         return func(*args, **kwargs)
 
     return wrapper
+
+
+def log_activity(action, filename):
+
+    activity = ActivityLog(
+        user_id=session["user_id"],
+        action=action,
+        filename=filename
+    )
+
+    db.session.add(activity)
 
 @app.route("/", methods=["GET", "POST"])
 @login_required
@@ -177,6 +218,7 @@ def home():
             )
 
             db.session.add(new_file)
+            log_activity("Uploaded", filename)
             db.session.commit()
 
         except (OSError, SQLAlchemyError):
@@ -195,8 +237,18 @@ def home():
         File.uploaded_at.desc()
     ).all()
 
-    return render_template("index.html", files=files)
+    activities = ActivityLog.query.filter_by(
+        user_id=session["user_id"]
+    ).order_by(
+        ActivityLog.created_at.desc(),
+        ActivityLog.id.desc()
+    ).limit(10).all()
 
+    return render_template(
+        "index.html",
+        files=files,
+        activities=activities
+    )
 
 @app.route("/download/<int:file_id>")
 @login_required
@@ -207,12 +259,24 @@ def download_file(file_id):
         user_id=session["user_id"]
     ).first_or_404()
 
-    return send_from_directory(
+    response = send_from_directory(
         app.config["UPLOAD_FOLDER"],
         file.stored_name,
         as_attachment=True,
         download_name=file.filename
     )
+
+    try:
+        log_activity("Downloaded", file.filename)
+        db.session.commit()
+
+    except SQLAlchemyError:
+        db.session.rollback()
+        response.close()
+        flash("Download failed.")
+        return redirect(url_for("home"))
+
+    return response
 
 
 @app.route("/delete/<int:file_id>", methods=["POST"])
@@ -227,6 +291,7 @@ def delete_file(file_id):
     file_path = UPLOAD_FOLDER / file.stored_name
 
     try:
+        log_activity("Deleted", file.filename)
         db.session.delete(file)
         db.session.commit()
 

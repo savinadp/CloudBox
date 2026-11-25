@@ -101,3 +101,41 @@ input[type="password"] {
 .user-section button:hover {
     background-color: #8ab3ee;
 }
+
+.activity-section {
+    margin-top: 40px;
+    text-align: left;
+}
+
+.activity-item {
+    background: white;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.activity-action {
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.uploaded {
+    color: #16a34a;
+}
+
+.downloaded {
+    color: #2563eb;
+}
+
+.deleted {
+    color: #dc2626;
+}
+
+.activity-item small {
+    color: #777;
+}
