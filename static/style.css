@@ -72,3 +72,15 @@ h1 {
     padding: 12px;
     border-radius: 6px;
 }
+
+input[type="text"],
+input[type="password"] {
+    display: block;
+    width: 80%;
+    max-width: 350px;
+    padding: 12px;
+    margin: 12px auto 20px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+}

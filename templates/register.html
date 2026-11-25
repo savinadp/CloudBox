@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Register | CloudBox</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>CloudBox</h1>
+        <p>Create your account</p>
+
+        {% for message in get_flashed_messages() %}
+        <p>{{ message }}</p>
+        {% endfor %}
+
+        <div class="upload-box">
+
+            <form method="POST">
+
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <label>Username</label>
+
+                <input type="text" name="username" placeholder="Username" minlength="3" maxlength="30" required>
+
+                <label>Password</label>
+
+                <input type="password" name="password" placeholder="Password" minlength="12" maxlength="128" required>
+
+                <button type="submit">
+                    Create Account
+                </button>
+
+            </form>
+
+        </div>
+
+        <p>
+            <a href="{{ url_for('home') }}">
+                Back to Home
+            </a>
+        </p>
+
+    </div>
+
+</body>
+
+</html>

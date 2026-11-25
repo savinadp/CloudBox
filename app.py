@@ -5,6 +5,10 @@ from dotenv import load_dotenv
 from uuid import uuid4
 from pathlib import Path
 from sqlalchemy.exc import SQLAlchemyError
+import re
+from werkzeug.security import generate_password_hash
+from flask_wtf.csrf import CSRFProtect
+from sqlalchemy.exc import IntegrityError
 
 from flask import (
     Flask,
@@ -33,6 +37,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = URL.create(
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 app.secret_key = os.getenv("SECRET_KEY")
+csrf = CSRFProtect(app)
 
 db = SQLAlchemy(app)
 
@@ -59,6 +64,28 @@ class File(db.Model):
     )
 
     uploaded_at = db.Column(
+        db.DateTime(timezone=True),
+        server_default=db.func.now(),
+        nullable=False
+    )
+
+class User(db.Model):
+
+    __tablename__ = "users"
+
+    id = db.Column(
+        db.Integer, primary_key=True
+    )
+
+    username = db.Column(
+        db.String(80), unique=True, nullable=False
+    )
+
+    password_hash = db.Column(
+        db.String(255), nullable=False
+    )
+
+    created_at = db.Column(
         db.DateTime(timezone=True),
         server_default=db.func.now(),
         nullable=False
@@ -189,6 +216,53 @@ def file_too_large(error):
     flash("File is too large. Maximum size is 5 MB.")
 
     return redirect(url_for("home"))
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+
+    if request.method == "POST":
+
+        username = request.form.get(
+            "username", ""
+        ).strip().lower()
+
+        password = request.form.get("password", "")
+
+        if not re.fullmatch(r"[a-z0-9_]{3,30}", username):
+            flash("Invalid username.")
+            return redirect(url_for("register"))
+
+        if not 12 <= len(password) <= 128:
+            flash("Password must be 12-128 characters.")
+            return redirect(url_for("register"))
+
+        existing_user = User.query.filter_by(
+            username=username
+        ).first()
+
+        if existing_user:
+            flash("Username already exists.")
+            return redirect(url_for("register"))
+
+        new_user = User(
+            username=username,
+            password_hash=generate_password_hash(password)
+        )
+
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+
+        except IntegrityError:
+            db.session.rollback()
+            flash("Username already exists.")
+            return redirect(url_for("register"))
+
+        flash("Account created successfully.")
+
+        return redirect(url_for("home"))
+
+    return render_template("register.html")
 
 
 if __name__ == "__main__":
