@@ -14,9 +14,21 @@
 
         <h1>CloudBox</h1>
         <p class="subtitle">Your secure cloud file storage</p>
-        <a href="{{ url_for('register') }}">
-            Create Account
-        </a>
+        <div class="user-section">
+        
+            <p>Welcome, {{ session["username"] }}!</p>
+        
+            <form action="{{ url_for('logout') }}" method="POST">
+        
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+                <button type="submit">
+                    Logout
+                </button>
+        
+            </form>
+        
+        </div>
 
         {% with messages = get_flashed_messages() %}
         

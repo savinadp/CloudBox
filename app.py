@@ -9,6 +9,9 @@ import re
 from werkzeug.security import generate_password_hash
 from flask_wtf.csrf import CSRFProtect
 from sqlalchemy.exc import IntegrityError
+from flask import session
+from functools import wraps
+from werkzeug.security import check_password_hash
 
 from flask import (
     Flask,
@@ -113,8 +116,23 @@ def allowed_file(filename):
         and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
     )
 
+def login_required(func):
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+
+        if "user_id" not in session:
+
+            flash("Please log in first.")
+
+            return redirect(url_for("login"))
+
+        return func(*args, **kwargs)
+
+    return wrapper
 
 @app.route("/", methods=["GET", "POST"])
+@login_required
 def home():
 
     if request.method == "POST":
@@ -172,6 +190,7 @@ def home():
 
 
 @app.route("/download/<int:file_id>")
+@login_required
 def download_file(file_id):
 
     file = db.get_or_404(File, file_id)
@@ -185,6 +204,7 @@ def download_file(file_id):
 
 
 @app.route("/delete/<int:file_id>", methods=["POST"])
+@login_required
 def delete_file(file_id):
 
     file = db.get_or_404(File, file_id)
@@ -260,9 +280,53 @@ def register():
 
         flash("Account created successfully.")
 
-        return redirect(url_for("home"))
-
+        return redirect(url_for("login"))
+    
     return render_template("register.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+
+    if request.method == "POST":
+
+        username = request.form.get(
+            "username", ""
+        ).strip().lower()
+
+        password = request.form.get("password", "")
+
+        user = User.query.filter_by(
+            username=username
+        ).first()
+
+        if user and check_password_hash(
+            user.password_hash, password
+        ):
+
+            session.clear()
+
+            session["user_id"] = user.id
+            session["username"] = user.username
+
+            flash("Login successful.")
+
+            return redirect(url_for("home"))
+
+        flash("Invalid username or password.")
+
+        return redirect(url_for("login"))
+
+    return render_template("login.html")
+
+@app.route("/logout", methods=["POST"])
+@login_required
+def logout():
+
+    session.clear()
+
+    flash("Logged out successfully.")
+
+    return redirect(url_for("login"))
 
 
 if __name__ == "__main__":
