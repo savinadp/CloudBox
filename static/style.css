@@ -139,3 +139,31 @@ input[type="password"] {
 .activity-item small {
     color: #777;
 }
+
+.search-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-form input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.clear-btn {
+    padding: 10px 15px;
+    background-color: #64748b;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.clear-btn:hover {
+    background-color: #475569;
+}
