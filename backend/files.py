@@ -90,9 +90,15 @@ def home():
 
         return redirect(url_for("home"))
 
-    files = File.query.filter_by(
+    search = request.args.get("search", "").replace("\x00", "").strip()
+    query = File.query.filter_by(
         user_id=session["user_id"]
-    ).order_by(
+    )
+    if search:
+        query = query.filter(
+            File.filename.icontains(search, autoescape=True)
+        )
+    files = query.order_by(
         File.uploaded_at.desc()
     ).all()
 
@@ -106,7 +112,8 @@ def home():
     return render_template(
         "index.html",
         files=files,
-        activities=activities
+        activities=activities,
+        search=search
     )
 
 
